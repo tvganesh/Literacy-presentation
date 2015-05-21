@@ -1,0 +1,99 @@
+Literacy in the state of Tamil Nadu - Rstudio presentation
+
+========================================================
+author: Tinniam V Ganesh
+date: 21 May 2015
+### Literacy in the state of Tamil Nadu (India)
+
+========================================================
+# Executive summary
+This project takes a look at the literacy in the state of Tamil Nadu in India. 
+The project uses a Shiny UI and a Shiny Server. A simple radio button option is given to the 
+user to check the details
+
+
+========================================================
+
+# Details:
+1. The UI portion of the Shiny app uses a simple radio button to chose options
+2. Appropriate charts are displayed based on option chosen
+3. Reactive output is shown in blue color
+
+===
+# ui.R 
+```{r eval=FALSE}
+shinyUI(
+  pageWithSidebar(
+    # Set the application title
+    headerPanel("A look at literacy in the state of Tamil Nadu (India)"),
+    
+    # Set the radio buttons
+    radioButtons("literacy", "Literacy in the state of Tamil Nadu (TN):",
+                 c("Total Males & Females attending educational institutions in TN" = "a",
+                   "Percent males  atending institutions in TN" = "b",
+                   "Percent females attending institutions in TN " = "c",
+                   "Pie chart for Tamil Nadu  of  persons  attending school" = "d")),
+    
+    # Create main panel
+    mainPanel(
+      
+      # Add reactive text that changes when the user chooses an option
+      tags$head(tags$style("#text1{color: blue;
+                                 font-size: 16px;
+                                 font-style: italic;
+                           }"
+      )
+      ),
+      # Reactive output
+      textOutput("text1"),
+      
+      # Plot the output based on the user choice
+      plotOutput(outputId = "main_plot", height = "300px")
+    )
+  )
+)
+```
+
+
+========================================================
+# server.R
+
+```{r, eval=FALSE}
+output$main_plot <- renderPlot({
+  if (input$literacy == "a") {
+    barplot(as.numeric(tnmat[6:7,]),names.arg=rep(tnmat[1,],each=2),main ="Persons attending educational institutions in TN - Males vs. Females", 
+            xlab = "Age", ylab= "Number", col =c("red","darkblue"), legend= c("Males","Females"),beside=TRUE)   
+  } else if (input$literacy == 'b') {
+    #Calculate percent of males attending education of total
+    percentM = round(as.numeric(eduM) *100/as.numeric(totalM),1)
+    barplot(percentM,names.arg=tnmat[1,],main ="Percentage males attending educational institutions in TN ", 
+            xlab = "Age", ylab= "Percentage", col ="lightblue", legend= c("Males")) 
+  } else if (input$literacy == 'c') {
+    #Calculate percent of females attending education of total
+    percentF = round(as.numeric(eduF) *100/as.numeric(totalF),1)
+    barplot(percentF,names.arg=tnmat[1,],main ="Percentage females attending educational institutions in TN ", 
+            xlab = "Age", ylab= "Percentage", col ="lightblue", legend= c("Females")) 
+    
+  } else if (input$literacy == 'd') {
+    #Pie chart for Tamil Nadu  of  persons between 15- 19 years attending school 
+    slices <- c(tnmat[8,12],tnmat[11,12],tnmat[14,12],tnmat[17,12],tnmat[20,12])
+    percentlabels <- round(as.numeric(slices) *100/as.numeric(tnmat[5,12],1))
+    pielabels<- paste(percentlabels, "%", sep="")
+    cols <- c("blue","green","cyan","red", "grey30")
+    
+    pie(as.numeric(slices), main="Tamil Nadu Literacy- Pie Chart", col=cols, labels=pielabels, cex=0.8)
+    legend("topright", c("School","College","Vocational","Literacy center","Other"), cex=0.8, fill=cols)
+  }
+```
+
+===
+
+# Conclusion
+1. The Shiny app uses a the radio button Widget
+2. Charts are displayed based on user button
+3. The Shiny app is kept simple and intuitive
+4. Reactive output text is created based on user choice
+
+===
+
+# ***Thank You***
